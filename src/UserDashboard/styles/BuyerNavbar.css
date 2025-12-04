@@ -1,0 +1,300 @@
+/* Navbar.buyer-css - Attractive Design with Enhanced Sticky */
+
+/* Main Navbar - Fixed at Top */
+.buyer-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #022b5f;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
+  height: 7.5rem;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  width: 100%;
+}
+
+.buyer-navbar-scrolled {
+  background: #022b5f;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  /* Height stays the same - no size change */
+}
+
+.buyer-navbar-container {
+  max-width: 1580px;
+  margin-top: 10px;
+  margin-right: 45px;
+  padding: 0 1rem;
+}
+
+.buyer-navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 90px;
+  position: relative;
+}
+
+/* Logo Styles */
+.buyer-navbar-logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.buyer-navbar-logo:hover {
+  transform: translateY(-2px);
+}
+
+.buyer-logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.buyer-logo-image {
+  height: 65px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.buyer-navbar-logo:hover .buyer-logo-image {
+  transform: scale(1.05);
+}
+
+/* Desktop Navigation Links */
+.buyer-nav-links-desktop {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.buyer-nav-link {
+  position: relative;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+.buyer-nav-link span {
+  position: relative;
+  z-index: 1;
+}
+
+.buyer-nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #886ace 0%, #B084E0 100%);
+  transition: width 0.3s ease;
+}
+
+.buyer-nav-link:hover {
+  color: #B084E0;
+}
+
+.buyer-nav-link:hover::before,
+.buyer-nav-link.active::before {
+  width: 100%;
+}
+
+.buyer-nav-link.active {
+  color: #886ace;
+}
+
+/* Mobile Menu Button */
+.buyer-mobile-menu-button {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 11;
+}
+
+.buyer-menu-icon-line {
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.buyer-mobile-menu-button.open .buyer-menu-icon-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.buyer-mobile-menu-button.open .buyer-menu-icon-line:nth-child(2) {
+  opacity: 0;
+}
+
+.buyer-mobile-menu-button.open .buyer-menu-icon-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile Menu */
+.buyer-mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  background: #022b5f;
+  backdrop-filter: blur(10px);
+}
+
+.buyer-mobile-menu.open {
+  max-height: 600px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.buyer-mobile-menu-content {
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.buyer-mobile-nav-link {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 0.875rem 1rem;
+  font-weight: 500;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.buyer-mobile-nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: linear-gradient(180deg, #886ace 0%, #B084E0 100%);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.buyer-mobile-nav-link:hover,
+.buyer-mobile-nav-link.active {
+  background: rgba(136, 106, 206, 0.2);
+  color: #B084E0;
+}
+
+.buyer-mobile-nav-link:hover::before,
+.buyer-mobile-nav-link.active::before {
+  transform: scaleY(1);
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .buyer-nav-links-desktop {
+    display: flex;
+  }
+
+  .buyer-mobile-menu-button {
+    display: none;
+  }
+
+  .buyer-mobile-menu {
+    display: none;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+  .buyer-nav-links-desktop {
+    display: none;
+  }
+
+  .buyer-mobile-menu-button {
+    display: flex;
+  }
+
+  .buyer-navbar-content {
+    height: 90px;
+  }
+}
+
+/* Enhanced Scrollbar for Mobile Menu */
+.buyer-mobile-menu-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.buyer-mobile-menu-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.buyer-mobile-menu-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8B5FBF 0%, #7A4FAF 100%);
+  border-radius: 2px;
+}
+
+.buyer-mobile-menu-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #B084E0 0%, #8B5FBF 100%);
+}
+
+/* Smooth Transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Focus Styles for Accessibility */
+.buyer-nav-link:focus,
+.buyer-mobile-menu-button:focus {
+  outline: 2px solid #886ace;
+  outline-offset: 2px;
+}
+
+/* Active State Animation */
+@keyframes buyer-slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link {
+  animation: buyer-slideIn 0.3s ease forwards;
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.buyer-mobile-menu.open .buyer-mobile-nav-link:nth-child(5) {
+  animation-delay: 0.25s;
+}
