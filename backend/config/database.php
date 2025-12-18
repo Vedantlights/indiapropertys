@@ -14,8 +14,16 @@ $isLocalhost = (
     )
 );
 
-// Check if this is demo2 subdomain
-$isDemo2 = isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'demo2.indiapropertys.com') !== false;
+// Check if this is demo2 subdomain (case-insensitive)
+$isDemo2 = false;
+if (isset($_SERVER['HTTP_HOST'])) {
+    $host = strtolower($_SERVER['HTTP_HOST']);
+    $isDemo2 = (
+        $host === 'demo2.indiapropertys.com' ||
+        strpos($host, 'demo2.indiapropertys.com') !== false ||
+        $host === 'www.demo2.indiapropertys.com'
+    );
+}
 
 if ($isLocalhost) {
     // LOCAL DEVELOPMENT (XAMPP)
