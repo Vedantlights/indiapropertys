@@ -58,6 +58,11 @@ function handlePreflight() {
 
 // Send JSON response
 function sendResponse($success, $message = '', $data = null, $statusCode = 200) {
+    // Clean any output buffer before sending response
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
     setCorsHeaders();
     http_response_code($statusCode);
     
@@ -70,7 +75,22 @@ function sendResponse($success, $message = '', $data = null, $statusCode = 200) 
         $response['data'] = $data;
     }
     
-    echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    
+    // Check if JSON encoding failed
+    if ($json === false) {
+        $error = json_last_error_msg();
+        error_log("JSON encoding error: " . $error);
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Response encoding error',
+            'error' => defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $error : 'Internal server error'
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit();
+    }
+    
+    echo $json;
     exit();
 }
 
