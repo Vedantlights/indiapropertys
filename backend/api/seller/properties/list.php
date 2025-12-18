@@ -31,9 +31,16 @@ try {
     $offset = ($page - 1) * $limit;
     $status = isset($_GET['status']) ? sanitizeInput($_GET['status']) : null;
     
-    // Build query - Note: GROUP_CONCAT with LIMIT is not supported, using subquery instead
+    // Build query - Explicitly select columns to avoid ONLY_FULL_GROUP_BY issues
+    // GROUP_CONCAT with LIMIT is not supported, using subquery instead
     $query = "
-        SELECT p.*,
+        SELECT p.id, p.user_id, p.title, p.status, p.property_type, p.location, 
+               p.latitude, p.longitude, p.bedrooms, p.bathrooms, p.balconies,
+               p.area, p.carpet_area, p.floor, p.total_floors, p.facing, p.age,
+               p.furnishing, p.description, p.price, p.price_negotiable,
+               p.maintenance_charges, p.deposit_amount, p.cover_image, p.video_url,
+               p.brochure_url, p.is_active, p.admin_status, p.is_featured,
+               p.rejection_reason, p.views_count, p.created_at, p.updated_at,
                COUNT(DISTINCT pi.id) as image_count,
                COUNT(DISTINCT i.id) as inquiry_count,
                GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order SEPARATOR ',') as images,
@@ -53,9 +60,10 @@ try {
         $params[] = $status;
     }
     
-    $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    // LIMIT and OFFSET must be integers, not bound parameters (PDO limitation)
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+    $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT {$limit} OFFSET {$offset}";
     
     $stmt = $db->prepare($query);
     $stmt->execute($params);
