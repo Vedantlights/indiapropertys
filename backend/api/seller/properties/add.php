@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Check authentication first
     $user = requireUserType(['seller', 'agent']);
     
     // Check property limit based on subscription
@@ -27,11 +28,11 @@ try {
     $subscription = $stmt->fetch();
     $planType = $subscription['plan_type'] ?? 'free';
     
-    // Get current property count
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM properties WHERE user_id = ?");
+    // Get current property count (only active properties count towards limit)
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM properties WHERE user_id = ? AND is_active = 1");
     $stmt->execute([$user['id']]);
     $countResult = $stmt->fetch();
-    $currentCount = $countResult['count'];
+    $currentCount = intval($countResult['count']);
     
     // Check limit
     $limits = [
@@ -43,7 +44,11 @@ try {
     
     $limit = $limits[$planType] ?? FREE_PLAN_PROPERTY_LIMIT;
     if ($limit > 0 && $currentCount >= $limit) {
-        sendError("Property limit reached. You can list up to $limit properties in your current plan.", null, 403);
+        sendError("Property limit reached. You can list up to $limit properties in your current plan. You currently have $currentCount active properties.", [
+            'current_count' => $currentCount,
+            'limit' => $limit,
+            'plan_type' => $planType
+        ], 403);
     }
     
     // Get input data
