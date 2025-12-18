@@ -46,14 +46,24 @@ const apiRequest = async (endpoint, options = {}) => {
     const contentType = response.headers.get('content-type');
     let data;
     
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
+    // Handle empty responses or non-JSON responses
+    const text = await response.text();
+    
+    if (!text || text.trim() === '') {
       throw {
-        status: response.status,
+        status: response.status || 500,
+        message: 'Empty response from server. Please check if the backend is running correctly.',
+      };
+    }
+    
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      // Response is not valid JSON
+      throw {
+        status: response.status || 500,
         message: text || 'Invalid response from server',
-        errors: null,
+        rawResponse: text.substring(0, 200), // First 200 chars for debugging
       };
     }
     
@@ -63,25 +73,29 @@ const apiRequest = async (endpoint, options = {}) => {
         status: response.status,
         message: data.message || 'Request failed',
         errors: data.errors || null,
-        data: data // Include full response for debugging
+        data: data.data || null, // Include full response data for debugging
       };
+      
+      // Handle specific error codes
+      if (response.status === 401) {
+        // Clear token if authentication fails
+        removeToken();
+        removeUser();
+        errorDetails.message = data.message || 'Authentication required. Please log in to continue.';
+      } else if (response.status === 403) {
+        errorDetails.message = data.message || 'Access denied. You do not have permission to perform this action.';
+      }
+      
       throw errorDetails;
     }
     
     return data;
   } catch (error) {
-    if (error.status) {
-      // Don't override error messages from backend - they're more specific
-      // Only add generic messages if backend didn't provide one
-      if (!error.message || error.message === 'Request failed') {
-        if (error.status === 401) {
-          error.message = 'Authentication required. Please log in to continue.';
-        } else if (error.status === 403) {
-          error.message = 'Access denied. You do not have permission to perform this action.';
-        }
-      }
+    // If it's already our formatted error, re-throw it
+    if (error.status !== undefined) {
       throw error;
     }
+    
     // Handle network errors or JSON parse errors
     throw {
       status: 0,
