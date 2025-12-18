@@ -113,8 +113,10 @@ try {
     if (!empty($where)) {
         $queryParams = $params;
     }
-    $queryParams[] = intval($limit);
-    $queryParams[] = intval($offset);
+    
+    // LIMIT and OFFSET must be integers, not bound parameters (PDO limitation)
+    $limit = (int)$limit;
+    $offset = (int)$offset;
     
     // Build SELECT columns - only include is_banned if column exists
     $selectColumns = "id, full_name, email, phone, user_type, email_verified, phone_verified, profile_image, created_at";
@@ -123,7 +125,7 @@ try {
     }
     
     // Get users
-    $query = "SELECT {$selectColumns} FROM users {$whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $query = "SELECT {$selectColumns} FROM users {$whereClause} ORDER BY created_at DESC LIMIT {$limit} OFFSET {$offset}";
     
     $stmt = $db->prepare($query);
     $stmt->execute($queryParams);
