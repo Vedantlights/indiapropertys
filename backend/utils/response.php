@@ -13,7 +13,7 @@ function setCorsHeaders() {
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
         // Production domains
-        'https://demo1.indiapropertys.com',
+        'https://demo2.indiapropertys.com',
         'https://indiapropertys.com',
         'https://www.indiapropertys.com',
     ];
