@@ -104,18 +104,24 @@ try {
         }
     }
     
-    // Build query
+    // Build query - Explicitly select columns to avoid ONLY_FULL_GROUP_BY issues
     $query = "
-        SELECT p.*,
+        SELECT p.id, p.user_id, p.title, p.status, p.property_type, p.location, 
+               p.latitude, p.longitude, p.bedrooms, p.bathrooms, p.balconies,
+               p.area, p.carpet_area, p.floor, p.total_floors, p.facing, p.age,
+               p.furnishing, p.description, p.price, p.price_negotiable,
+               p.maintenance_charges, p.deposit_amount, p.cover_image, p.video_url,
+               p.brochure_url, p.is_active, p.admin_status, p.is_featured,
+               p.rejection_reason, p.views_count, p.created_at, p.updated_at,
                u.full_name as seller_name,
                u.phone as seller_phone,
-               GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order) as images,
-               GROUP_CONCAT(DISTINCT pa.amenity_id) as amenities
+               GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order SEPARATOR ',') as images,
+               GROUP_CONCAT(DISTINCT pa.amenity_id SEPARATOR ',') as amenities
         FROM properties p
         INNER JOIN users u ON p.user_id = u.id
         LEFT JOIN property_images pi ON p.id = pi.property_id
         LEFT JOIN property_amenities pa ON p.id = pa.property_id
-        WHERE p.is_active = 1
+        WHERE p.is_active = 1 AND p.admin_status = 'approved'
     ";
     
     $params = [];
@@ -183,9 +189,10 @@ try {
         $params[] = $searchTerm;
     }
     
-    $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    // LIMIT and OFFSET must be integers, not bound parameters (PDO limitation)
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+    $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT {$limit} OFFSET {$offset}";
     
     $stmt = $db->prepare($query);
     $stmt->execute($params);
