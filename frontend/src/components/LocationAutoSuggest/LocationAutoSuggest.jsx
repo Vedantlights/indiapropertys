@@ -4,7 +4,7 @@ import './LocationAutoSuggest.css';
 // Reuse existing Mapbox token env variable used by map components
 const MAPBOX_TOKEN =
   process.env.REACT_APP_MAPBOX_ACCESS_TOKEN ||
-  'pk.eyJ1Ijoic3VkaGFrYXBvdWwiLCJhIjoiY21penRmYWs1MDFpNDNkc2I4M2tid2x1MCJ9.YTMezksySLU7ZpcYkvXyqg';
+  'pk.eyJ1Ijoic3VkaGFrYXJwb3VsIiwiYSI6ImNtaXp0ZmFrNTAxaTQzZHNiODNrYndsdTAifQ.YTMezksySLU7ZpcYkvXyqg';
 
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 300;
@@ -343,7 +343,22 @@ const LocationAutoSuggest = ({
         )}.json?access_token=${MAPBOX_TOKEN}&country=in&types=place,locality,neighborhood,address,poi&bbox=72.6,15.6,80.9,22.1&limit=10`;
 
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error('Failed to fetch locations');
+        
+        // Handle 401 Unauthorized - invalid or missing API token
+        if (response.status === 401) {
+          console.error('Mapbox API: 401 Unauthorized - Invalid or missing access token');
+          // Use static fallback instead of throwing
+          const fallback = getStaticFallbackSuggestions(query);
+          setSuggestions(fallback);
+          setIsOpen(fallback.length > 0);
+          setHighlightedIndex(fallback.length > 0 ? 0 : -1);
+          setErrorState('Mapbox API authentication failed. Using local suggestions. Please set REACT_APP_MAPBOX_ACCESS_TOKEN in your .env file.');
+          return;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch locations: ${response.status} ${response.statusText}`);
+        }
 
         const data = await response.json();
 
