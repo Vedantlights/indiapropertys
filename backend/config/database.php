@@ -34,7 +34,7 @@ if ($isLocalhost) {
     define('DB_PASS', 'Demo2indiapropertys');
 } else {
     // PRODUCTION - OTHER DOMAINS (Hostinger)
-    // Default production database (for demo1 or other domains)
+    // Default production database (for other domains)
     define('DB_HOST', '127.0.0.1');
     define('DB_PORT', '3306');
     define('DB_NAME', 'u449667423_Indiapropertys');
