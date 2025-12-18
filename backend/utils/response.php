@@ -32,9 +32,17 @@ function setCorsHeaders() {
     // Set CORS origin header
     if (!empty($origin) && in_array($origin, $allowedOrigins)) {
         header("Access-Control-Allow-Origin: $origin");
-    } else {
-        // Default to first allowed origin for development
+    } elseif (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
+        // In development, allow localhost
         header('Access-Control-Allow-Origin: http://localhost:3000');
+    } else {
+        // In production, use the request origin if it matches demo2 domain
+        if (!empty($origin) && strpos($origin, 'demo2.indiapropertys.com') !== false) {
+            header("Access-Control-Allow-Origin: $origin");
+        } else {
+            // Fallback to demo2
+            header('Access-Control-Allow-Origin: https://demo2.indiapropertys.com');
+        }
     }
     
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');
