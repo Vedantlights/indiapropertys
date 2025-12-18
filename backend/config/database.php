@@ -26,9 +26,9 @@ if ($isLocalhost) {
     // Values provided from your Hostinger MySQL details
     define('DB_HOST', '127.0.0.1');
     define('DB_PORT', '3306');
-    define('DB_NAME', 'u449667423_Indiapropertys');
-    define('DB_USER', 'u449667423_Indiaprop');
-    define('DB_PASS', 'V1d2a3n4t@2020');
+    define('DB_NAME', 'u449667423_demo2');
+    define('DB_USER', 'u449667423_demo2');
+    define('DB_PASS', 'Demo2indiapropertys');
 }
 
 define('DB_CHARSET', 'utf8mb4');
