@@ -3,14 +3,13 @@
  * Error Handler
  */
 
+// Clean output buffer
+if (ob_get_level() > 0) {
+    ob_end_clean();
+}
+
 require_once __DIR__ . '/../utils/response.php';
 
-header('Content-Type: application/json');
-http_response_code(404);
-
-echo json_encode([
-    'success' => false,
-    'message' => 'Endpoint not found',
-    'data' => null
-], JSON_UNESCAPED_UNICODE);
+// Use response helper to ensure proper JSON
+sendError('Endpoint not found', null, 404);
 
