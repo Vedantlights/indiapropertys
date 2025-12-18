@@ -72,28 +72,53 @@ function getCurrentUser() {
     $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
     
     if (empty($authHeader)) {
+        error_log("getCurrentUser: No Authorization header found");
         return null;
     }
     
     // Extract token from "Bearer <token>"
     if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
         $token = $matches[1];
+        
+        if (empty($token)) {
+            error_log("getCurrentUser: Empty token in Authorization header");
+            return null;
+        }
+        
         $payload = verifyToken($token);
         
-        if ($payload) {
+        if (!$payload) {
+            error_log("getCurrentUser: Token verification failed - token may be expired or invalid");
+            return null;
+        }
+        
+        try {
             require_once __DIR__ . '/../config/database.php';
             $db = getDB();
             
-            $stmt = $db->prepare("SELECT id, full_name, email, phone, user_type, email_verified, phone_verified, profile_image FROM users WHERE id = ?");
+            $stmt = $db->prepare("SELECT id, full_name, email, phone, user_type, email_verified, phone_verified, profile_image, is_banned FROM users WHERE id = ?");
             $stmt->execute([$payload['user_id']]);
             $user = $stmt->fetch();
             
-            if ($user) {
-                return $user;
+            if (!$user) {
+                error_log("getCurrentUser: User not found in database for user_id: " . $payload['user_id']);
+                return null;
             }
+            
+            // Check if user is banned
+            if (isset($user['is_banned']) && $user['is_banned']) {
+                error_log("getCurrentUser: User is banned - user_id: " . $user['id']);
+                return null;
+            }
+            
+            return $user;
+        } catch (Exception $e) {
+            error_log("getCurrentUser: Database error - " . $e->getMessage());
+            return null;
         }
     }
     
+    error_log("getCurrentUser: Invalid Authorization header format");
     return null;
 }
 
@@ -101,7 +126,8 @@ function getCurrentUser() {
 function requireAuth() {
     $user = getCurrentUser();
     if (!$user) {
-        sendError('Authentication required', null, 401);
+        error_log("Authentication failed: No user found. Token: " . (isset(getallheaders()['Authorization']) ? 'present' : 'missing'));
+        sendError('Authentication required. Please log in to continue.', null, 401);
     }
     return $user;
 }
