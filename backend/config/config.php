@@ -3,6 +3,53 @@
  * Application Configuration
  */
 
+// Start output buffering to prevent any output before JSON
+ob_start();
+
+// Set error handler to catch all errors and return JSON
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    // Only handle errors if output buffering is active
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    // Don't handle errors if they're suppressed with @
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+    
+    // Log the error
+    error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
+    
+    // Send JSON error response
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error occurred',
+        'error' => defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $errstr : 'Internal server error'
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit();
+});
+
+// Set exception handler
+set_exception_handler(function($exception) {
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    error_log("Uncaught Exception: " . $exception->getMessage() . " in " . $exception->getFile() . " on line " . $exception->getLine());
+    
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error occurred',
+        'error' => defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $exception->getMessage() : 'Internal server error'
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit();
+});
+
 // CORS Headers
 // Add your production frontend domain(s) here
 $allowed_origins = [
