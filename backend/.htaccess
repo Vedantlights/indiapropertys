@@ -7,7 +7,7 @@ RewriteEngine On
 <IfModule mod_headers.c>
     # CORS is primarily handled by PHP (config.php / response.php)
     # If you need Apache-level CORS in production, uncomment and set your domain:
-    # Header set Access-Control-Allow-Origin "https://demo1.indiapropertys.com"
+    # Header set Access-Control-Allow-Origin "https://demo2.indiapropertys.com"
     # For local development, you can temporarily use:
     # Header set Access-Control-Allow-Origin "http://localhost:3000"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
