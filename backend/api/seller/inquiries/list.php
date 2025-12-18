@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
+require_once __DIR__ . '/../../../utils/validation.php'; // Ensure sanitizeInput is loaded
 require_once __DIR__ . '/../../../utils/auth.php';
 
 handlePreflight();
@@ -55,9 +56,10 @@ try {
         $params[] = $propertyId;
     }
     
-    $query .= " ORDER BY i.created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    // LIMIT and OFFSET must be integers, not bound parameters (PDO limitation)
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+    $query .= " ORDER BY i.created_at DESC LIMIT {$limit} OFFSET {$offset}";
     
     $stmt = $db->prepare($query);
     $stmt->execute($params);
