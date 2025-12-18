@@ -60,7 +60,19 @@ class Database {
             $this->conn = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
             error_log("Database Connection Error: " . $e->getMessage());
-            throw new Exception("Database connection failed");
+            // Clean output buffer if active
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            // Return proper JSON error instead of throwing
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Database connection failed',
+                'error' => defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $e->getMessage() : 'Unable to connect to database'
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            exit();
         }
     }
 
