@@ -6,6 +6,31 @@
 // Start output buffering to prevent any output before JSON
 ob_start();
 
+// Register shutdown function to handle fatal errors and flush buffer
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        // Clean output buffer
+        if (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        
+        // Send JSON error response
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Fatal error occurred',
+            'error' => defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $error['message'] . ' in ' . $error['file'] . ' on line ' . $error['line'] : 'Internal server error'
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } else {
+        // Flush output buffer normally
+        if (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+    }
+});
+
 // Set error handler to catch all errors and return JSON
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
     // Only handle errors if output buffering is active
