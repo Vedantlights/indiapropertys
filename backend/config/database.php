@@ -14,6 +14,9 @@ $isLocalhost = (
     )
 );
 
+// Check if this is demo2 subdomain
+$isDemo2 = isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'demo2.indiapropertys.com') !== false;
+
 if ($isLocalhost) {
     // LOCAL DEVELOPMENT (XAMPP)
     define('DB_HOST', 'localhost');
@@ -21,14 +24,22 @@ if ($isLocalhost) {
     define('DB_USER', 'root');
     define('DB_PASS', '');
     define('DB_NAME', 'indiapropertys_db');
-} else {
-    // PRODUCTION (Hostinger)
-    // Values provided from your Hostinger MySQL details
+} elseif ($isDemo2) {
+    // PRODUCTION - DEMO2 (Hostinger)
+    // Database for demo2.indiapropertys.com
     define('DB_HOST', '127.0.0.1');
     define('DB_PORT', '3306');
     define('DB_NAME', 'u449667423_demo2');
     define('DB_USER', 'u449667423_demo2');
     define('DB_PASS', 'Demo2indiapropertys');
+} else {
+    // PRODUCTION - OTHER DOMAINS (Hostinger)
+    // Default production database (for demo1 or other domains)
+    define('DB_HOST', '127.0.0.1');
+    define('DB_PORT', '3306');
+    define('DB_NAME', 'u449667423_Indiapropertys');
+    define('DB_USER', 'u449667423_Indiaprop');
+    define('DB_PASS', 'V1d2a3n4t@2020');
 }
 
 define('DB_CHARSET', 'utf8mb4');
