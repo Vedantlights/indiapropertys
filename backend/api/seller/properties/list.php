@@ -18,7 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $user = requireUserType(['seller', 'agent']);
     
-    $db = getDB();
+    try {
+        $db = getDB();
+    } catch (Exception $dbError) {
+        error_log("Database connection failed in list.php: " . $dbError->getMessage());
+        sendError('Database connection failed', null, 500);
+    }
     
     // Get query parameters
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
@@ -26,14 +31,14 @@ try {
     $offset = ($page - 1) * $limit;
     $status = isset($_GET['status']) ? sanitizeInput($_GET['status']) : null;
     
-    // Build query
+    // Build query - Note: GROUP_CONCAT with LIMIT is not supported, using subquery instead
     $query = "
         SELECT p.*,
                COUNT(DISTINCT pi.id) as image_count,
                COUNT(DISTINCT i.id) as inquiry_count,
-               GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order) as images,
-               GROUP_CONCAT(DISTINCT pa.amenity_id) as amenities,
-               GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order LIMIT 1) as cover_image
+               GROUP_CONCAT(DISTINCT pi.image_url ORDER BY pi.image_order SEPARATOR ',') as images,
+               GROUP_CONCAT(DISTINCT pa.amenity_id SEPARATOR ',') as amenities,
+               (SELECT pi2.image_url FROM property_images pi2 WHERE pi2.property_id = p.id ORDER BY pi2.image_order LIMIT 1) as cover_image
         FROM properties p
         LEFT JOIN property_images pi ON p.id = pi.property_id
         LEFT JOIN property_amenities pa ON p.id = pa.property_id
@@ -90,8 +95,17 @@ try {
         ]
     ]);
     
+} catch (PDOException $e) {
+    error_log("List Properties Database Error: " . $e->getMessage());
+    error_log("SQL Error Info: " . print_r($e->errorInfo, true));
+    sendError('Database error occurred', null, 500);
 } catch (Exception $e) {
     error_log("List Properties Error: " . $e->getMessage());
-    sendError('Failed to retrieve properties', null, 500);
+    error_log("Error Trace: " . $e->getTraceAsString());
+    sendError('Failed to retrieve properties: ' . (defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $e->getMessage() : 'Please try again'), null, 500);
+} catch (Throwable $e) {
+    error_log("List Properties Fatal Error: " . $e->getMessage());
+    error_log("Error Trace: " . $e->getTraceAsString());
+    sendError('Server error occurred', null, 500);
 }
 
