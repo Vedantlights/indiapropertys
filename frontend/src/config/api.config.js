@@ -15,7 +15,7 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 // Base URL for the PHP backend
 // Production: Hostinger subdomain
 // NOTE: This should point to your deployed backend (demo subdomain)
-const PRODUCTION_API_URL = 'https://demo2.indiapropertys.com/api';
+const PRODUCTION_API_URL = 'https://demo2.indiapropertys.com/backend/api';
 const DEVELOPMENT_API_URL = 'http://localhost/Fullstack/backend/api';
 
 export const API_BASE_URL = isDevelopment ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
