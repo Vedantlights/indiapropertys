@@ -117,11 +117,12 @@ try {
         FROM users
         {$whereClause}
         ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT {$limit} OFFSET {$offset}
     ";
     
-    $params[] = intval($limit);
-    $params[] = intval($offset);
+    // LIMIT and OFFSET must be integers, not bound parameters (PDO limitation)
+    $limit = (int)$limit;
+    $offset = (int)$offset;
     
     $stmt = $db->prepare($query);
     $stmt->execute($params);
