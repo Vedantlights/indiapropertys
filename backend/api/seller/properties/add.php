@@ -183,8 +183,17 @@ try {
         throw $e;
     }
     
+} catch (PDOException $e) {
+    error_log("Add Property Database Error: " . $e->getMessage());
+    error_log("SQL Error Info: " . print_r($e->errorInfo, true));
+    sendError('Database error occurred', null, 500);
 } catch (Exception $e) {
     error_log("Add Property Error: " . $e->getMessage());
-    sendError('Failed to add property', null, 500);
+    error_log("Error Trace: " . $e->getTraceAsString());
+    sendError('Failed to add property: ' . (defined('ENVIRONMENT') && ENVIRONMENT === 'development' ? $e->getMessage() : 'Please try again'), null, 500);
+} catch (Throwable $e) {
+    error_log("Add Property Fatal Error: " . $e->getMessage());
+    error_log("Error Trace: " . $e->getTraceAsString());
+    sendError('Server error occurred', null, 500);
 }
 
