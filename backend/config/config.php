@@ -12,7 +12,6 @@ $allowed_origins = [
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
     // Production - Hostinger / live domains
-    'https://demo1.indiapropertys.com',
     'https://demo2.indiapropertys.com',
     'https://indiapropertys.com',
     'https://www.indiapropertys.com',
@@ -62,11 +61,11 @@ if ($isLocalhost) {
     ini_set('display_errors', 1);
 } else {
     // PRODUCTION (Hostinger)
-    // TODO: Replace with your actual subdomain URL
-    // Example: https://api.yourdomain.com or https://backend.yourdomain.com
+    // Since backend is in /backend subfolder, we need to include it in BASE_URL
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'];
-    define('BASE_URL', $protocol . '://' . $host);
+    // Include /backend in BASE_URL since files are in public_html/demo2/backend/
+    define('BASE_URL', $protocol . '://' . $host . '/backend');
     define('ENVIRONMENT', 'production');
     // Error reporting disabled for production
     error_reporting(0);
